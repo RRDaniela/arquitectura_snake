@@ -32,7 +32,9 @@ int index = nFoodY * LED_MATRIX_0_WIDTH + nFoodX;
 food += index;
 *food = 0x8fce00;
 border_2 += 840;
-snake+=30;
+int snake_length= 4;
+int direction = 0;
+snake+=437;
 border_4 += 34;
 bool isDead = false;
 int snakeBody[875];
@@ -55,25 +57,28 @@ while(1)
 for(int i = 0; i<10000; i++){
 a = i;
 }
-// Verificar si la serpiente puede moverse hacia arriba y no toca el color indicado
-if (*d_pad_up == 1 && *(snake - LED_MATRIX_0_WIDTH) != 0xc800ce) {
+        // Verificar y actualizar la dirección basada en la entrada del usuario
+        if (*d_pad_up == 1 && direction != 1) {
+            direction = 0; // Mover hacia arriba
+        } else if (*d_pad_do == 1 && direction != 0) {
+            direction = 1; // Mover hacia abajo
+        } else if (*d_pad_le == 1 && direction != 3) {
+            direction = 2; // Mover hacia la izquierda
+        } else if (*d_pad_ri == 1 && direction != 2) {
+            direction = 3; // Mover hacia la derecha
+        }
+
+// Actualizar la posición de la cabeza de la serpiente según la dirección
+if (direction == 0 && *(snake - LED_MATRIX_0_WIDTH) != 0xc800ce && *(snake - LED_MATRIX_0_WIDTH) != 0x00e8ff) {
     snake -= LED_MATRIX_0_WIDTH;
-}
-
-// Verificar si la serpiente puede moverse hacia abajo y no toca el color indicado
-if (*d_pad_do == 1 && *(snake + LED_MATRIX_0_WIDTH) != 0xc800ce) {
+} else if (direction == 1 && *(snake + LED_MATRIX_0_WIDTH) != 0xc800ce && *(snake + LED_MATRIX_0_WIDTH) != 0x00e8ff) {
     snake += LED_MATRIX_0_WIDTH;
-}
-
-// Verificar si la serpiente puede moverse hacia la izquierda y no toca el color indicado
-if (*d_pad_le == 1 && *(snake - 1) != 0xc800ce) {
+} else if (direction == 2 && *(snake - 1) != 0xc800ce && *(snake - 1) != 0x00e8ff) {
     snake -= 1;
-}
-
-// Verificar si la serpiente puede moverse hacia la derecha y no toca el color indicado
-if (*d_pad_ri == 1 && *(snake + 1) != 0xc800ce) {
+} else if (direction == 3 && *(snake + 1) != 0xc800ce && *(snake + 1) != 0x00e8ff) {
     snake += 1;
 }
+
 *snake = 0x00e8ff;
 }
 }
