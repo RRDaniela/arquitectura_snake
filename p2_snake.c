@@ -90,7 +90,7 @@ a = i;
 // Mover la primera dirección del arreglo (head) dependiendo de la entrada del D-pad
 // Mover la serpiente hacia arriba cuando se presiona *d_pad_up
 if (*d_pad_up == 1) {
-    *snake_tail = 0xff0000; // Borra la cola anterior
+    *snake_tail = 0x000000; // Borra la cola anterior
     printf("Valor de cola: %p\n", snake_tail);
 
 
@@ -101,22 +101,74 @@ if (*d_pad_up == 1) {
     }
     printf("__________________\n");
 
-    snake_segments[0] = snake_head; // Actualizar la dirección de la cabeza en snake_segments
-
     // Mover la cabeza hacia arriba
     snake_head -= LED_MATRIX_0_WIDTH;
 
     // Dibujar la nueva cabeza
-    *snake_head = 0xe800ff;
-
+    *snake_head = 0x00e8ff;
+    snake_segments[0] = snake_head; // Actualizar la dirección de la cabeza en snake_segments
     snake_tail = snake_segments[snake_length - 1]; // Actualizar la cola
 }
-snake_segments[0] -= LED_MATRIX_0_WIDTH;
-if (*d_pad_do == 1)
-snake_segments[0] += LED_MATRIX_0_WIDTH;
-if (*d_pad_le == 1)
-snake_segments[0] -= 1;
-if (*d_pad_ri == 1)
-snake_segments[0] += 1;
+if (*d_pad_do == 1){
+    *snake_tail = 0x000000; // Borra la cola anterior
+    printf("Valor de cola: %p\n", snake_tail);
+
+
+    // Actualizar las posiciones en snake_segments para simular el movimiento
+    for (int i = snake_length - 1; i > 0; i--) {
+        snake_segments[i] = snake_segments[i - 1]; // Mover cada segmento hacia adelante
+                    printf("Valor de snake_segments[%d]: %p\n", i, (void *)snake_segments[i]);
+    }
+    printf("__________________\n");
+
+    // Mover la cabeza hacia arriba
+    snake_head += LED_MATRIX_0_WIDTH;
+
+    // Dibujar la nueva cabeza
+    *snake_head = 0x00e8ff;
+    snake_segments[0] = snake_head; // Actualizar la dirección de la cabeza en snake_segments
+    snake_tail = snake_segments[snake_length - 1]; // Actualizar la cola
 }
+if (*d_pad_le == 1){
+    *snake_tail = 0x000000; // Borra la cola anterior
+    printf("Valor de cola: %p\n", snake_tail);
+
+
+    // Actualizar las posiciones en snake_segments para simular el movimiento
+    for (int i = snake_length - 1; i > 0; i--) {
+        snake_segments[i] = snake_segments[i - 1]; // Mover cada segmento hacia adelante
+                    printf("Valor de snake_segments[%d]: %p\n", i, (void *)snake_segments[i]);
+    }
+    printf("__________________\n");
+
+    // Mover la cabeza hacia arriba
+    snake_head -= 1;
+
+    // Dibujar la nueva cabeza
+    *snake_head = 0x00e8ff;
+    snake_segments[0] = snake_head; // Actualizar la dirección de la cabeza en snake_segments
+    snake_tail = snake_segments[snake_length - 1]; // Actualizar la cola
+}
+if (*d_pad_ri == 1)
+{
+    *snake_tail = 0x000000; // Borra la cola anterior
+    printf("Valor de cola: %p\n", snake_tail);
+
+
+    // Actualizar las posiciones en snake_segments para simular el movimiento
+    for (int i = snake_length - 1; i > 0; i--) {
+        snake_segments[i] = snake_segments[i - 1]; // Mover cada segmento hacia adelante
+                    printf("Valor de snake_segments[%d]: %p\n", i, (void *)snake_segments[i]);
+    }
+    printf("__________________\n");
+
+    // Mover la cabeza hacia arriba
+    snake_head +=1;
+
+    // Dibujar la nueva cabeza
+    *snake_head = 0x00e8ff;
+    snake_segments[0] = snake_head; // Actualizar la dirección de la cabeza en snake_segments
+    snake_tail = snake_segments[snake_length - 1]; // Actualizar la cola
+        }
+    }
 }
