@@ -1,6 +1,7 @@
 #include "ripes_system.h"
 #include "time.h"
 #include "math.h"
+
 #define SW0 (0x01)
 #define SW1 (0x02)
 #define SW2 (0x04)
@@ -8,98 +9,114 @@
 #define true 1
 #define false 0
 
+typedef int bool;
 
-typedef int bool; //Definir bool
+// Define snake head and tail
+volatile unsigned int *snake_head = LED_MATRIX_0_BASE;
+volatile unsigned int *snake_tail = LED_MATRIX_0_BASE;
+volatile unsigned int *test = LED_MATRIX_0_BASE;
 
-//Definir cabeza y cola de la serpiente
-volatile unsigned int * snake_head = LED_MATRIX_0_BASE;
-volatile unsigned int * snake_tail = LED_MATRIX_0_BASE;
 
-volatile unsigned int * border = LED_MATRIX_0_BASE;
-volatile unsigned int * border_2 = LED_MATRIX_0_BASE;
-volatile unsigned int * border_3 = LED_MATRIX_0_BASE;
-volatile unsigned int * border_4 = LED_MATRIX_0_BASE;
-volatile unsigned int * food = LED_MATRIX_0_BASE;
-volatile unsigned int * d_pad_up = D_PAD_0_UP;
-volatile unsigned int * d_pad_do = D_PAD_0_DOWN;
-volatile unsigned int * d_pad_le = D_PAD_0_LEFT;
-volatile unsigned int * d_pad_ri = D_PAD_0_RIGHT;
+volatile unsigned int *border = LED_MATRIX_0_BASE;
+volatile unsigned int *border_2 = LED_MATRIX_0_BASE;
+volatile unsigned int *border_3 = LED_MATRIX_0_BASE;
+volatile unsigned int *border_4 = LED_MATRIX_0_BASE;
+volatile unsigned int *food = LED_MATRIX_0_BASE;
+volatile unsigned int *d_pad_up = D_PAD_0_UP;
+volatile unsigned int *d_pad_do = D_PAD_0_DOWN;
+volatile unsigned int *d_pad_le = D_PAD_0_LEFT;
+volatile unsigned int *d_pad_ri = D_PAD_0_RIGHT;
 
-void main()
-{
+#define SIZE (LED_MATRIX_0_WIDTH * LED_MATRIX_0_HEIGHT)
+
+void main() {
 unsigned int mask = 0;
 int a;
-//Posición donde aparecerá la comida
+// Position where the food will appear
 int nFoodX = 15;
 int nFoodY = 10;
 int index = nFoodY * LED_MATRIX_0_WIDTH + nFoodX;
 food += index;
 *food = 0x8fce00;
-
-//Borde 2
+// Border 2
 border_2 += 840;
 
-//Longitud inicial de la serpiente
-int snake_length= 4;
+// Initial snake length
+int snake_length = 4;
 
-//Dirección inicial de la serpiente
+// Initial snake direction
 int direction = 0;
 
-//Posición inicial de la cabeza de la serpiente
-snake_head+=437;
+// Initial position of snake head
+snake_head += 437;
+test += 437;
 
-//Borde 4
+// Border 4
 border_4 += 34;
 
-//Booleano para saber si ya murió la serpiente
+// Booleano para ver si la serpiente ya murió
 bool isDead = false;
 
-int snake_headBody[875];
-//Pintar los bordes de arriba y abajo
-for(int i = 0; i<35; i++){ 
-    *border = 0xc800ce; 
-    *border_2 = 0xc800ce; 
-    border = border + 1;
-    border_2 = border_2+1;
+// Dibujar los bordes
+for (int i = 0; i < 35; i++) {
+*border = 0xc800ce;
+*border_2 = 0xc800ce;
+border = border + 1;
+border_2 = border_2 + 1;
 }
 
-//Pintar los bordes de de los lados
-for(int i=0; i<25; i++){
-    *border_3 = 0xc800ce; 
-    *border_4 = 0xc800ce;
-    border_3 = border_3+35;
-    border_4 = border_4+35;
+// Dibujar los bordes
+for (int i = 0; i < 25; i++) {
+*border_3 = 0xc800ce;
+*border_4 = 0xc800ce;
+border_3 = border_3 + 35;
+border_4 = border_4 + 35;
 }
 
-while(1 && !isDead)
-{
-for(int i = 0; i<10000; i++){
+int snake_segments[875]; // Guardar las direcciones de la serpiente
+
+for (int i = 0; i < snake_length; ++i) {
+snake_segments[i] = (int)(snake_head - i);
+*(snake_head - i) = 0x00e8ff; // Dibuja la serpiente inicialmente
+}
+
+snake_tail = snake_segments[snake_length-1];
+
+while (1 && !isDead) {
+for (int i = 0; i < 10000; i++) {
 a = i;
 }
-// Verificar y actualizar la dirección basada en la entrada del usuario
-if (*d_pad_up == 1 && direction != 1) {
-direction = 0; // Mover hacia arriba
-} else if (*d_pad_do == 1 && direction != 0) {
-direction = 1; // Mover hacia abajo
-} else if (*d_pad_le == 1 && direction != 3) {
-direction = 2; // Mover hacia la izquierda
-} else if (*d_pad_ri == 1 && direction != 2) {
-direction = 3; // Mover hacia la derecha
-}
 
-// Actualizar la posición de la cabeza de la serpiente según la dirección
-if (direction == 0 && *(snake_head - LED_MATRIX_0_WIDTH) != 0xc800ce && *(snake_head - LED_MATRIX_0_WIDTH) != 0x00e8ff) {
-snake_head -= LED_MATRIX_0_WIDTH;
-} else if (direction == 1 && *(snake_head + LED_MATRIX_0_WIDTH) != 0xc800ce && *(snake_head + LED_MATRIX_0_WIDTH) != 0x00e8ff) {
-snake_head += LED_MATRIX_0_WIDTH;
-} else if (direction == 2 && *(snake_head - 1) != 0xc800ce && *(snake_head - 1) != 0x00e8ff) {
-snake_head -= 1;
-} else if (direction == 3 && *(snake_head + 1) != 0xc800ce && *(snake_head + 1) != 0x00e8ff) {
-snake_head += 1;
-}else{
-    isDead = true; }
+// Mover la primera dirección del arreglo (head) dependiendo de la entrada del D-pad
+// Mover la serpiente hacia arriba cuando se presiona *d_pad_up
+if (*d_pad_up == 1) {
+    *snake_tail = 0xff0000; // Borra la cola anterior
+    printf("Valor de cola: %p\n", snake_tail);
 
-*snake_head = 0x00e8ff;
+
+    // Actualizar las posiciones en snake_segments para simular el movimiento
+    for (int i = snake_length - 1; i > 0; i--) {
+        snake_segments[i] = snake_segments[i - 1]; // Mover cada segmento hacia adelante
+                    printf("Valor de snake_segments[%d]: %p\n", i, (void *)snake_segments[i]);
+    }
+    printf("__________________\n");
+
+    snake_segments[0] = snake_head; // Actualizar la dirección de la cabeza en snake_segments
+
+    // Mover la cabeza hacia arriba
+    snake_head -= LED_MATRIX_0_WIDTH;
+
+    // Dibujar la nueva cabeza
+    *snake_head = 0xe800ff;
+
+    snake_tail = snake_segments[snake_length - 1]; // Actualizar la cola
+}
+snake_segments[0] -= LED_MATRIX_0_WIDTH;
+if (*d_pad_do == 1)
+snake_segments[0] += LED_MATRIX_0_WIDTH;
+if (*d_pad_le == 1)
+snake_segments[0] -= 1;
+if (*d_pad_ri == 1)
+snake_segments[0] += 1;
 }
 }
-
