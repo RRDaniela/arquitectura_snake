@@ -28,9 +28,27 @@ volatile unsigned int *d_pad_ri = D_PAD_0_RIGHT;
 
 #define SIZE (LED_MATRIX_0_WIDTH * LED_MATRIX_0_HEIGHT)
 
+void foodPosition(volatile unsigned int * food){
+    int position;
+    do{
+        position = rand() % (875);
+    } while(
+        (position > 35 && position < 840) &&
+        (position % 34 == 0) &&
+        (position % 35 == 0)
+    );
+    printf("position %d", position);
+    position += LED_MATRIX_0_BASE;
+    food = position;
+    *food = 0x8fce00;
+    }
+
+
 void main() {
+    srand (5);
     unsigned int mask = 0;
     int a;
+    
     // Position where the food will appear
     int nFoodX = 15;
     int nFoodY = 10;
@@ -85,7 +103,7 @@ void main() {
     bool gameStarted = false; // Flag to indicate if the game has started
 
     while (1 && !isDead) {
-        for (int i = 0; i < 10000; i++) {
+        for (int i = 0; i < 100000; i++) {
             a = i;
         }
         
@@ -114,6 +132,7 @@ if (direction == 0  && *(snake_head - LED_MATRIX_0_WIDTH) != 0xc800ce && *(snake
     snake_head -= LED_MATRIX_0_WIDTH;
     if(*snake_head == 0x8fce00){
         snake_length+=1;
+        foodPosition(&food);
     }
 
     // Dibujar la nueva cabeza
@@ -134,6 +153,7 @@ else if (direction == 1  && *(snake_head + LED_MATRIX_0_WIDTH) != 0xc800ce && *(
     snake_head += LED_MATRIX_0_WIDTH;
     if(*snake_head == 0x8fce00){
         snake_length+=1;
+        foodPosition(&food);
     }
 
     // Dibujar la nueva cabeza
@@ -154,6 +174,7 @@ else if (direction == 2  && *(snake_head - 1) != 0xc800ce && *(snake_head - 1) !
     snake_head -= 1;
     if(*snake_head == 0x8fce00){
         snake_length+=1;
+        foodPosition(&food);
     }
 
     // Dibujar la nueva cabeza
@@ -176,6 +197,8 @@ else if (direction == 3  && *(snake_head + 1) != 0xc800ce && *(snake_head + 1) !
     *snake_head = 0x00e8ff;
     if(*snake_head == 0x8fce00){
         snake_length+=1;
+        foodPosition(&food);
+        
     }
     snake_segments[0] = snake_head; // Actualizar la dirección de la cabeza en snake_segments
     snake_tail = snake_segments[snake_length - 1]; // Actualizar la cola
